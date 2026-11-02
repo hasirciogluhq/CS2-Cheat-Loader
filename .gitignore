@@ -1,4 +1,8 @@
-./build
-build
-.cache
-node_modules
+build/
+out/
+.xmake/
+.cache/
+.DS_Store
+vsxmake*/
+compile_commands.json
+imgui.ini
