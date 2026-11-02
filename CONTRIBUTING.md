@@ -36,11 +36,24 @@ This must succeed before you open a pull request.
 
 ## Pull requests
 
-1. Fork the repository, or push a branch if you have write access.
-2. Make sure `./build.sh debug` passes.
-3. Fill in the pull request template. Describe what changed, why, and how you tested it.
+1. Fork `hasirciogluhq/CS2-Cheat-Loader` on GitHub, then clone your fork and add the
+   original repository as `upstream`:
+
+   ```sh
+   git remote add upstream https://github.com/hasirciogluhq/CS2-Cheat-Loader.git
+   ```
+
+2. Create a branch from the latest `upstream/main`:
+
+   ```sh
+   git fetch upstream && git checkout -b feat/my-change upstream/main
+   ```
+
+3. Make sure `./build.sh debug` passes.
+4. Push the branch to your fork and open a pull request against `hasirciogluhq/CS2-Cheat-Loader`, branch `main`.
+5. Fill in the pull request template. Describe what changed, why, and how you tested it.
    If you could not test something (for example on Windows or MSVC), say so.
-4. Keep the pull request small enough to review in one sitting.
+6. Keep the pull request small enough to review in one sitting.
 
 A maintainer will review the change. Expect questions and requested changes. This is normal.
 

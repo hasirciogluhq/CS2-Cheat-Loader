@@ -108,9 +108,33 @@ build.sh              convenience wrapper around xmake
 
 ## Contributing
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request, and follow the
-[Code of Conduct](CODE_OF_CONDUCT.md). Report security issues as described in
-[SECURITY.md](SECURITY.md).
+Contributions are welcome. The project is public and meant for learning, so fixes,
+documentation, new widgets, and better error messages are all useful.
+
+Fork and pull request workflow:
+
+```sh
+# 1. Fork https://github.com/hasirciogluhq/CS2-Cheat-Loader on GitHub (Fork button)
+# 2. Clone your fork and add the original as "upstream"
+git clone https://github.com/<your-user>/CS2-Cheat-Loader.git
+cd CS2-Cheat-Loader
+git remote add upstream https://github.com/hasirciogluhq/CS2-Cheat-Loader.git
+
+# 3. Create a branch from the latest main
+git fetch upstream && git checkout -b feat/my-change upstream/main
+
+# 4. Build, commit, push to your fork
+./build.sh debug
+git push -u origin feat/my-change
+
+# 5. Open a pull request against hasirciogluhq/CS2-Cheat-Loader:main
+```
+
+Please also read [CONTRIBUTING.md](CONTRIBUTING.md) for the coding rules and the
+pull request checklist, and follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+Good first contributions are open issues labelled `good first issue` and documentation
+fixes. For a larger change, open an issue first. Report security issues as described
+in [SECURITY.md](SECURITY.md).
 
 ## License
 
