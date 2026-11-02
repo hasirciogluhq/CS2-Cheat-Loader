@@ -16,7 +16,9 @@ src/ui/fonts.*          embedded font loading
 src/ui/primitives/      text (h1-h4/text/paragraph/label/muted/small), layout (spacer/same_line/column_width),
                         separator/vseparator, spinner
 src/ui/widgets/         button (5 variants, 3 sizes), card, badge, kbd, input, checkbox, toggle (switch),
-                        slider, progress, tabs, select, alert, avatar, tooltip
+                        slider, progress, tabs, select, alert, avatar, tooltip, textarea, radio_group, toggle_group,
+                        accordion, popup (menu/context menu/popover/dialog), skeleton, breadcrumb, pagination,
+                        table, scroll_area, toast, combobox, number_input
                         (#include "ui/widgets/widgets.hpp" for all of them)
 src/ui/ui.*             ImGui init + per-frame UI (put loader logic here)
 assets/fonts/           embedded TTFs

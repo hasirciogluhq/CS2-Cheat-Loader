@@ -129,6 +129,77 @@ void tab_components() {
     w::alert("##err", "Error", "Something went wrong.", true);
 }
 
+void tab_more() {
+    static int radio = 0, seg = 0, page = 0, num = 5, combo = -1;
+    static bool pressed = false;
+    static char notes[256] = "";
+    static const char* const games[] = {"Counter-Strike 2", "Dota 2", "Valorant", "Apex Legends"};
+
+    w::breadcrumb("bc", {"Home", "Loader", "More"});
+    p::spacer(2.f);
+    if (w::card_begin("##forms", "Forms")) {
+        w::textarea("##notes", notes, 60.f);
+        p::spacer(2.f);
+        w::radio_group("rg", radio, {"Release", "Beta", "Nightly"});
+        p::spacer(2.f);
+        w::toggle_group("tg", {"Day", "Week", "Month"}, seg);
+        p::same_line();
+        w::toggle_button("Bold", pressed);
+        p::spacer(2.f);
+        w::combobox("##combo", combo, games, 4, "Select game...");
+        p::spacer(2.f);
+        w::input_number("num", num, 0, 20);
+    }
+    w::card_end();
+    if (w::card_begin("##overlays", "Overlays")) {
+        if (w::button("Dialog", w::Variant::Outline)) w::open_popup("dlg");
+        p::same_line();
+        if (w::button("Menu", w::Variant::Outline)) w::open_popup("menu");
+        if (w::menu_begin("menu")) {
+            w::menu_label("My Account");
+            w::menu_item("Profile", "Ctrl+P");
+            w::menu_item("Settings", "Ctrl+S");
+            w::menu_separator();
+            if (w::menu_item("Log out", nullptr, true)) w::toast("Logged out", "See you soon.");
+            w::menu_end();
+        }
+        p::same_line();
+        if (w::button("Popover", w::Variant::Outline)) w::open_popup("pop");
+        if (w::popover_begin("pop")) {
+            p::h4("Dimensions");
+            p::muted("Set the dimensions for the layer.");
+            w::menu_end();
+        }
+        p::same_line();
+        if (w::button("Toast", w::Variant::Outline)) w::toast("Saved", "Your changes were saved.");
+        p::same_line();
+        if (w::button("Error toast", w::Variant::Outline)) w::toast("Failed", "Something went wrong.", 3.f, true);
+
+        if (w::dialog_begin("dlg", "Are you sure?", "This action cannot be undone.")) {
+            if (w::button("Cancel", w::Variant::Outline)) w::close_popup();
+            p::same_line();
+            if (w::button("Continue")) w::close_popup();
+            w::dialog_end();
+        }
+    }
+    w::card_end();
+    if (w::card_begin("##data", "Data")) {
+        if (w::accordion("What is this?", true)) p::muted_wrap("A shadcn-style widget kit built on ImGui.");
+        if (w::table_begin("tbl", {"Name", "Status", "Ping"})) {
+            w::table_row(); p::text("Frankfurt"); w::table_cell(); w::badge("Online"); w::table_cell(); p::muted("12 ms");
+            w::table_row(); p::text("Istanbul"); w::table_cell(); w::badge("Busy", w::BadgeVariant::Secondary); w::table_cell(); p::muted("34 ms");
+            w::table_end();
+        }
+        p::spacer(2.f);
+        w::pagination("pg", page, 10);
+        p::spacer(2.f);
+        w::skeleton(0.f, 12.f);
+        w::skeleton(160.f, 12.f);
+        p::separator_label("OR");
+    }
+    w::card_end();
+}
+
 }  // namespace
 
 void frame(core::Window& win) {
@@ -144,14 +215,20 @@ void frame(core::Window& win) {
 
     header(win);
     static int tab = 0;
-    w::tabs("main", {"Loader", "Settings", "Components"}, tab);
-    switch (tab) {
-        case 0: tab_loader(); break;
-        case 1: tab_settings(); break;
-        case 2: tab_components(); break;
+    w::tabs("main", {"Loader", "Settings", "Components", "More"}, tab);
+    p::spacer(2.f);
+    if (w::scroll_area_begin("##body")) {
+        switch (tab) {
+            case 0: tab_loader(); break;
+            case 1: tab_settings(); break;
+            case 2: tab_components(); break;
+            case 3: tab_more(); break;
+        }
     }
+    w::scroll_area_end();
 
     ImGui::End();
+    w::toast_render();
     ImGui::Render();
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 }
