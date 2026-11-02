@@ -10,20 +10,14 @@ ImGui is downloaded automatically by xmake (no manual download).
 - C++26 (`std::print`), no modules/`import std` (MinGW module support is still unstable).
 - No `imgui.ini` is ever written (`IniFilename = nullptr`).
 - Fonts (Open Sans) are embedded at build time with xmake's `utils.bin2c` rule (`assets/fonts/*.ttf`).
-- Theme follows shadcn/ui zinc dark (`src/ui/theme.hpp`).
-
-## Layout
-
-```
-src/main.cpp            entry point (WinMain)
-src/core/config.hpp     size / radius / tint constants
-src/core/window.*       Win32 window, acrylic blur, rounded region, drag
-src/core/renderer.*     D3D11 device + swapchain (transparent clear)
-src/ui/theme.hpp        shadcn colors + radius
-src/ui/style.*          ImGui style (rounded window/border, translucent bg)
+- Theme follows shadcn/ui zinc dark (`src/ui/theme.hpp        design tokens (index.css equivalent): colors, radius, spacing, font sizes
+src/ui/style.*          pushes tokens into ImGuiStyle (call apply_style() after changing a token)
 src/ui/fonts.*          embedded font loading
-src/ui/primitives/      text (h1/h3/text/label/muted/small), separator, spacer
-src/ui/widgets/         card, button (composed from primitives)
+src/ui/primitives/      text (h1-h4/text/paragraph/label/muted/small), layout (spacer/same_line/column_width),
+                        separator/vseparator, spinner
+src/ui/widgets/         button (5 variants, 3 sizes), card, badge, kbd, input, checkbox, toggle (switch),
+                        slider, progress, tabs, select, alert, avatar, tooltip
+                        (#include "ui/widgets/widgets.hpp" for all of them)
 src/ui/ui.*             ImGui init + per-frame UI (put loader logic here)
 assets/fonts/           embedded TTFs
 ```

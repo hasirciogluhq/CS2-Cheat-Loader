@@ -1,2 +1,5 @@
 #pragma once
-namespace ui { void apply_style(); }
+namespace ui {
+// Push theme tokens (ui/theme.hpp) into ImGuiStyle. Call again after changing a token.
+void apply_style();
+}

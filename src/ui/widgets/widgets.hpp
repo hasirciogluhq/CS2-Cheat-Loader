@@ -1,0 +1,18 @@
+#pragma once
+// Convenience umbrella header: #include "ui/widgets/widgets.hpp" gives you everything.
+#include "ui/primitives/layout.hpp"
+#include "ui/primitives/separator.hpp"
+#include "ui/primitives/spinner.hpp"
+#include "ui/primitives/text.hpp"
+#include "ui/widgets/alert.hpp"
+#include "ui/widgets/avatar.hpp"
+#include "ui/widgets/badge.hpp"
+#include "ui/widgets/button.hpp"
+#include "ui/widgets/card.hpp"
+#include "ui/widgets/input.hpp"
+#include "ui/widgets/progress.hpp"
+#include "ui/widgets/select.hpp"
+#include "ui/widgets/slider.hpp"
+#include "ui/widgets/tabs.hpp"
+#include "ui/widgets/toggle.hpp"
+#include "ui/widgets/tooltip.hpp"
