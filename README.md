@@ -1,71 +1,117 @@
-# CS2 Loader
+# CS2 Loader (educational project)
 
-Empty loader template: native Windows 10/11 window, acrylic blur background, DX11 + ImGui
-with rounded, almost transparent window background. C++26, built with xmake.
-ImGui is downloaded automatically by xmake (no manual download).
+An educational Windows project that shows how a native C++26 application is built
+end to end: a Win32 window with acrylic blur, a DirectX 11 renderer driven by Dear ImGui,
+a small design-token UI library, and an injection API that demonstrates two ways of
+loading code into another process.
 
-## Design decisions
+> **Disclaimer.** This project is for learning and for use on software you own or are
+> authorized to test. It contains no game-specific logic and no anti-detection or
+> evasion features, and none will be accepted. Do not use it to violate any game's
+> terms of service or any law.
 
-- Native Win32 + DX11 (no SDL): reliable acrylic blur + per-pixel alpha, nothing extra to build.
-- C++26 (`std::print`), no modules/`import std` (MinGW module support is still unstable).
-- No `imgui.ini` is ever written (`IniFilename = nullptr`).
-- Fonts (Open Sans) are embedded at build time with xmake's `utils.bin2c` rule (`assets/fonts/*.ttf`).
-- Theme follows shadcn/ui zinc dark (`src/ui/theme.hpp        design tokens (index.css equivalent): colors, radius, spacing, font sizes
-src/ui/style.*          pushes tokens into ImGuiStyle (call apply_style() after changing a token)
-src/ui/fonts.*          embedded font loading
-src/ui/primitives/      text (h1-h4/text/paragraph/label/muted/small), layout (spacer/same_line/column_width),
-                        separator/vseparator, spinner
-src/ui/widgets/         button (5 variants, 3 sizes), card, badge, kbd, input, checkbox, toggle (switch),
-                        slider, progress, tabs, select, alert, avatar, tooltip, textarea, radio_group, toggle_group,
-                        accordion, popup (menu/context menu/popover/dialog), skeleton, breadcrumb, pagination,
-                        table, scroll_area, toast, combobox, number_input
-                        (#include "ui/widgets/widgets.hpp" for all of them)
-src/ui/ui.*             ImGui init + per-frame UI (put loader logic here)
-assets/fonts/           embedded TTFs
-```
+## What is in here
 
-Output: `out/<mode>/<os>-<arch>/CS2Loader.exe` (e.g. `out/debug/windows-x86_64/`).
-Intermediates: `build/`.
+| Area | Path | What it shows |
+|------|------|---------------|
+| Window | `src/core/window.*` | Borderless Win32 window, acrylic blur, rounded corners, dragging |
+| Renderer | `src/core/renderer.*` | DX11 device, swap chain, ImGui backend |
+| UI kit | `src/ui/` | Design tokens (zinc dark), primitives and ~30 shadcn-style widgets on ImGui |
+| Injection API | `src/inject/` | Provider abstraction with two methods, each with its own options (see below) |
 
-## Build on Windows (MSVC) — NOT TESTED
+The injection API is **not wired into the UI**. It is a standalone library that you
+can read, build and test on its own.
 
-> The MSVC config is written but has not been tested yet.
+### Injection API
 
-Requirements: Visual Studio 2022+ (C++ workload, `/std:c++latest`), xmake.
+`inject::Options` is a `std::variant` of two methods. Each method has its own options:
 
-```powershell
-xmake f -y -p windows -a x64 -m release   # or -m debug
-xmake
-# or simply: ./build.sh debug
-.\out\release\windows-x86_64\CS2Loader.exe
-```
+- `Load_library_options`: writes the module path into the target and runs
+  `LoadLibraryW` in a remote thread. Options: `timeout_ms`, `verify_loaded`.
+- `Manual_map_options`: maps a PE image into the target without the Windows loader.
+  Options: `timeout_ms`, `prefer_image_base`, `adjust_protections`, `enable_seh`,
+  `enable_tls_callbacks`, `call_entry`, `dll_reason`, `reserved`.
 
-Note: on MSVC the arch folder is `x64` (`out/release/windows-x64/`).
+Input is a file (both methods) or a memory buffer (manual map only).
 
-## Build on macOS (MinGW cross-compile, tested)
+Every error carries a `Stage` (for example `open`, `write`, `imports`, `entry`) and a
+Win32 code or stage detail where available, so a failure tells you where it happened.
+
+Scope and limits of the manual mapper:
+- Windows x64 only, targets must be 64-bit.
+- Static TLS data and C++ throw trampolines (`_CxxThrowException` / `RtlPcToFileHeader`)
+  are not implemented.
+- Only the mapping and initialization path is implemented. There is no unload path.
+
+Header wiping, section stripping and module hiding are intentionally left out.
+
+## Language and toolchain rules
+
+- **C++26 only** (`set_languages("c++26")`). Code must not target C++23 or older standards.
+- C++23 language and library features are allowed when they are part of C++26.
+- Write modern code: `std::expected` for errors, `std::print`, `std::span`, RAII, `enum class`,
+  no raw `new`/`delete`, no C-style casts, no macros unless the language offers no alternative.
+- Windows x64 is the only platform. The code does not build for other targets.
+
+See [CLAUDE.md](CLAUDE.md) for the full rules used by contributors and AI assistants.
+
+## Build
+
+Requirements: [xmake](https://xmake.io).
+
+### macOS / Linux host, MinGW cross-compile (tested)
 
 ```sh
 brew install xmake mingw-w64
 xmake f -y -p mingw -a x86_64 -m debug --mingw=/opt/homebrew   # or -m release
 xmake
-# or simply: ./build.sh debug
-# run the .exe with Wine/CrossOver (or copy it to a Windows machine)
+# or: ./build.sh debug
 ```
 
-Requires GCC 14+ (for `<print>`, `-std=c++26`). The binary is statically linked.
-Debug builds open a console and use the D3D11 debug layer when available.
-Blur/transparency under Wine/CrossOver may look different than on real Windows.
+Requires GCC 14 or newer (for `<print>` and C++26 support). The binary is statically
+linked. Run the `.exe` with Wine/CrossOver or on a Windows machine.
 
-## How to test the MSVC build (with Claude)
+### Windows, MSVC (not tested yet)
 
-On a Windows machine, open Claude Code in this repo and use this prompt:
+Requires Visual Studio 2022 or newer with the C++ workload.
+
+```powershell
+xmake f -y -p windows -a x64 -m release   # or -m debug
+xmake
+.\out\release\windows-x64\CS2Loader.exe
+```
+
+The MSVC configuration is written but has not been tested. Reports and fixes are welcome.
+
+### Output
+
+- `out/<mode>/<os>-<arch>/CS2Loader.exe`, for example `out/debug/windows-x86_64/`
+- Intermediates go to `build/`
+
+## Project layout
 
 ```
-Build this project on Windows with MSVC using xmake:
-  xmake f -y -p windows -a x64 -m debug && xmake
-then the same for -m release. Fix every compile/link error or warning you find
-(the MSVC config in xmake.lua has never been tested), keep C++26 (/std:c++latest),
-keep the out/<mode>/<os>-<arch> layout, and make sure the MinGW build still works.
-Run the exe and verify: borderless window, acrylic blur, rounded corners,
-draggable, close button works. Report what you changed.
+src/
+  main.cpp            entry point
+  core/               window, renderer, config
+  ui/                 theme, style, fonts, primitives, widgets
+  inject/             injection API (Load_library and Manual_map providers)
+assets/fonts/         Open Sans, embedded at build time with xmake's bin2c rule
+xmake.lua             build description (ImGui is fetched automatically)
+build.sh              convenience wrapper around xmake
 ```
+
+## Third-party software
+
+- [Dear ImGui](https://github.com/ocornut/imgui), MIT license, fetched by xmake
+- [Open Sans](https://fonts.google.com/specimen/Open+Sans), SIL Open Font License 1.1
+
+## Contributing
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request, and follow the
+[Code of Conduct](CODE_OF_CONDUCT.md). Report security issues as described in
+[SECURITY.md](SECURITY.md).
+
+## License
+
+Apache License 2.0. See [LICENSE](LICENSE).
